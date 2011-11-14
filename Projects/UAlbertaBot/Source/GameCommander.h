@@ -17,7 +17,7 @@ class TimerManager
 
 	std::vector<Timer> timers;
 	std::vector<std::string> timerNames;
-
+	
 	int barWidth;
 
 public:

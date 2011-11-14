@@ -29,6 +29,12 @@ void UAlbertaBotModule::onStart()
 
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
 
+	//BWAPI::Broodwar->printf("Test test\n");
+
+	//setup neural nets for zealots and gateways, initially.
+	nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Zealot));
+	nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Gateway));
+
 	BWTA::readMap();
 	BWTA::analyze();
 }

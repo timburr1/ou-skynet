@@ -2,8 +2,8 @@
  * Tim Burr
  * 11-5-11
  */
-
 #include "NeuralNet.h"
+
 #include <assert.h>
 #include <fstream>
 #include <iostream>
@@ -12,17 +12,26 @@
 #include <time.h>
 using namespace std;
 
-NeuralNet::NeuralNet(unitTypes unit)
+NeuralNet::NeuralNet(BWAPI::UnitType unit)
 {
 	thisUnit = unit;
 
+	BWAPI::Broodwar->printf("Creating neural net for: %s\n", thisUnit.getName());	
+
 	//read weights from file:
 	string line;
-	char *fileName = unit + ".txt";
-	ifstream weightsFile (fileName);
+	
+	string fileName("NN_weights\\");
+	fileName += unit.getName();
+	fileName += ".txt";
+
+	ifstream weightsFile (fileName.c_str());
 	
 	if(!weightsFile.is_open()) //i.e. file doesn't exist yet
+	{
+		BWAPI::Broodwar->printf("Did not open weights file.\n");
 		initializeRandomWeights(); 
+	}
 
 	for(int i=0; i < NUM_INPUTS; i++)
 	{
@@ -52,8 +61,10 @@ NeuralNet::NeuralNet(unitTypes unit)
 
 void NeuralNet::writeWeightsToFile()
 {
-	char *fileName = thisUnit + ".txt";
-	ofstream weightsFile (fileName);
+	string fileName(thisUnit.getName());
+	fileName += ".txt";
+	
+	ofstream weightsFile (fileName.c_str());
 	assert(weightsFile.is_open());
 
 	for(int i=0; i < NUM_INPUTS; i++)
@@ -128,8 +139,12 @@ void NeuralNet::updateWeights(double reward)
 
 void NeuralNet::initializeRandomWeights()
 {
-	char *fileName = thisUnit + ".txt";
-	ofstream weightsFile (fileName);
+	BWAPI::Broodwar->printf("Initializing random weights.\n");
+
+	string fileName (thisUnit.getName());
+	fileName += ".txt";
+	
+	ofstream weightsFile (fileName.c_str());
 	assert(weightsFile.is_open());
 
 	srand((unsigned) time(0));

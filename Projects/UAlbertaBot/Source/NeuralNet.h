@@ -2,6 +2,10 @@
  * Tim Burr
  * 11-5-11
  */
+#pragma once
+
+#include "BWAPI/UnitType.h"
+#include "BWAPI/Game.h"
 
 //15 unit types, 16 buiding types, total number of units, 
 //available capacity, log minerals, log vespene gas
@@ -9,7 +13,7 @@
 #define NUM_HIDDEN_NODES 7
 #define LEARNING_RATE .0000000001
 
-enum unitTypes {
+/*enum unitTypes {
 	NEXUS,
 	ASSIMILATOR,
 	PYLON,
@@ -41,12 +45,12 @@ enum unitTypes {
 	SCOUT,
 	SHUTTLE,
 	ZEALOT
-};
+};*/
 
 class NeuralNet
 {
 public:
-	NeuralNet(unitTypes unit);
+	NeuralNet(BWAPI::UnitType unit);
 	void writeWeightsToFile();
 	double getQ(double inputs[]);
 	void updateWeights(double reward);
@@ -62,5 +66,5 @@ private:
 	double randomGaussian(double min, double max);
 	double sigmoid(double input);
 	double sigmoidDerivative(double input);
-	unitTypes thisUnit;
+	BWAPI::UnitType thisUnit;
 };
