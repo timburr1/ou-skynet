@@ -8,8 +8,6 @@
 #include "MapTools.h"
 #include "HardCodedInfo.h"
 
-#include "NeuralNet.h"
-
 class UAlbertaBotModule : public BWAPI::AIModule
 {
 	GameCommander	gameCommander;
@@ -34,9 +32,6 @@ public:
 
 	void parseMap();
 	void moveSelectedUnit(int x, int y);
-
-private:
-	std::vector<NeuralNet> nets;
 };
 
 #endif

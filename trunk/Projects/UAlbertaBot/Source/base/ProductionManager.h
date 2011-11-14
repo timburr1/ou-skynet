@@ -6,6 +6,8 @@
 #include "StarcraftBuildOrderSearchManager.h"
 #include "StrategyManager.h"
 
+#include "NeuralNet.h"
+
 typedef unsigned char Action;
 
 class CompareWhenStarted 
@@ -30,6 +32,9 @@ class ProductionManager
 	ProductionManager();
 	
 	static ProductionManager *	instance;
+
+	std::vector<NeuralNet> nets;
+	std::vector<NeuralNet> netsToUpdate;
 
 	std::map<char, MetaType>	typeCharMap;
 	std::vector< std::pair<MetaType, int> > searchGoal;

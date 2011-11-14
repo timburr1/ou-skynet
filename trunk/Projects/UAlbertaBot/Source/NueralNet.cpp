@@ -21,11 +21,13 @@ NeuralNet::NeuralNet(BWAPI::UnitType unit)
 	//read weights from file:
 	string line;
 	
-	string fileName("NN_weights\\");
+	string fileName("C:\\NN_weights\\");
 	fileName += unit.getName();
 	fileName += ".txt";
 
-	ifstream weightsFile (fileName.c_str());
+	printf("\nFilename is: %s", fileName);
+
+	ifstream weightsFile(fileName.c_str());
 	
 	if(!weightsFile.is_open()) //i.e. file doesn't exist yet
 	{
@@ -61,10 +63,12 @@ NeuralNet::NeuralNet(BWAPI::UnitType unit)
 
 void NeuralNet::writeWeightsToFile()
 {
-	string fileName(thisUnit.getName());
+	string fileName("C:\\NN_weights\\");
+	fileName += thisUnit.getName();
 	fileName += ".txt";
 	
-	ofstream weightsFile (fileName.c_str());
+	ofstream weightsFile(fileName.c_str());
+
 	assert(weightsFile.is_open());
 
 	for(int i=0; i < NUM_INPUTS; i++)
@@ -118,7 +122,6 @@ double NeuralNet::getQ(double inputs[])
 void NeuralNet::updateWeights(double reward)
 {
 	double error = reward - prevPredictedQ; 
-	//double hiddenLayerErrors[NUM_HIDDEN_NODES];
 
 	//update zy weights
 	for(int j = 0; j < NUM_HIDDEN_NODES; j++)
@@ -141,10 +144,12 @@ void NeuralNet::initializeRandomWeights()
 {
 	BWAPI::Broodwar->printf("Initializing random weights.\n");
 
-	string fileName (thisUnit.getName());
+	string fileName("C:\\NN_weights\\");
+	fileName += thisUnit.getName();
 	fileName += ".txt";
 	
-	ofstream weightsFile (fileName.c_str());
+	ofstream weightsFile(fileName.c_str());
+
 	assert(weightsFile.is_open());
 
 	srand((unsigned) time(0));
