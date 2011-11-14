@@ -17,8 +17,8 @@ ProductionManager::ProductionManager() : reservedMinerals(0), reservedGas(0),
 	populateTypeCharMap();
 
 	//setup neural nets. initially, we just want to test w/ gateways and zealots.
-	nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Zealot));
-	nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Gateway));
+	//nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Zealot));
+	//nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Gateway));
 
 	setBuildOrder(StarcraftBuildOrderSearchManager::getInstance()->getOpeningBuildOrder());
 }
@@ -78,6 +78,15 @@ void ProductionManager::update()
 	StrategyManager::getInstance()->drawGoalInformation(300,200);
 
 //	if (DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawTextScreen(447, 17, "\x07 %d", BuildingManager::getInstance()->getReservedMinerals());
+
+	//Here I'm printing all the things I can build
+	//BWAPI::Broodwar->printf("%d",canMakeList().size());
+
+	BOOST_FOREACH(BWAPI::UnitType t,canMakeList()){
+		BWAPI::Broodwar->printf(t.getName().c_str());
+	}
+
+	
 }
 
 // on unit destroy
@@ -193,6 +202,60 @@ bool ProductionManager::canMakeNow(BWAPI::Unit * producer, MetaType t)
 
 	return canMake;
 }
+
+/**
+* This method allows you to determine if any of your units can build this MetaType t
+*/
+bool ProductionManager::canProduce(MetaType t)
+{
+	
+	bool canMake = meetsReservedResources(t);
+	if(canMake == false){
+		return canMake;
+	} else {
+		BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->self()->getUnits())
+		{
+			if (t.isUnit())
+			{
+				canMake = BWAPI::Broodwar->canMake(unit, t.unitType);
+			}
+			else if (t.isTech())
+			{
+				canMake = BWAPI::Broodwar->canResearch(unit, t.techType);
+			}
+			else if (t.isUpgrade())
+			{
+				canMake = BWAPI::Broodwar->canUpgrade(unit, t.upgradeType);
+			}
+			else
+			{		
+				assert(false);
+			}
+			if(canMake){
+				return canMake;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
+* Returns a vector of all possible MetaTypes that can be built
+*/
+std::vector<BWAPI::UnitType> ProductionManager::canMakeList()
+{
+	std::vector<BWAPI::UnitType> list;
+
+	BOOST_FOREACH(BWAPI::UnitType t, BWAPI::UnitTypes::allUnitTypes()){
+		if(canProduce( MetaType(t) )){
+			list.push_back(t);
+		}
+	}
+
+	return list;
+}
+
 
 bool ProductionManager::detectBuildOrderDeadlock()
 {

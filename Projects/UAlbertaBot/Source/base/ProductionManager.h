@@ -62,6 +62,8 @@ class ProductionManager
 	void						performCommand(BWAPI::UnitCommandType t);
 	void						printProductionInfo(int x, int y);
 	bool						canMakeNow(BWAPI::Unit * producer, MetaType t);
+	bool						canProduce(MetaType t);
+	std::vector<BWAPI::UnitType> canMakeList();
 	void						predictWorkerMovement(const Building & b);
 
 	bool						detectBuildOrderDeadlock();
