@@ -155,7 +155,7 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 
 	bool nexusInProgress =		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus) > 
 								BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-
+/*
 	int zealotsWanted = numZealots + 8;
 	int dragoonsWanted = numDragoons;
 	int gatewayWanted = 3;
@@ -202,18 +202,27 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 	{
 		probesWanted = numProbes + 6;
 	}
-
+*/
 	if (expand())
 	{
 		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
 	}
-
+/*
 	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Dragoon,	dragoonsWanted));
 	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Zealot,	zealotsWanted));
 	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Gateway,	gatewayWanted));
 	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Probe,	std::min(90, probesWanted)));
+*/
+	
+	
+	int maxQ = -1;
+	MetaType unitToBuild = MetaType(BWAPI::UnitTypes::Protoss_Probe);
+	//for each neural net
+		//if we can build that unit
+			//if net.getQ(state) > maxQ
+	
+	goal.push_back(std::pair<MetaType, int>(unitToBuild, numProbes+1));
 
 	currentGoal = goal;
-	return goal;
-	
+	return goal;	
 }

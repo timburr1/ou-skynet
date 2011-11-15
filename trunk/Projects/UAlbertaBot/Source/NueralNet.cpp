@@ -16,7 +16,7 @@ NeuralNet::NeuralNet(BWAPI::UnitType unit)
 {
 	thisUnit = unit;
 
-	BWAPI::Broodwar->printf("Creating neural net for: %s\n", thisUnit.getName());	
+	BWAPI::Broodwar->printf("Creating neural net for: %s,\n", thisUnit.getName().c_str());	
 
 	//read weights from file:
 	string line;

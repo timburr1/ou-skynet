@@ -74,14 +74,14 @@ void BuildOrderGoalManager::addGoal(const MetaType t, int num, int p)
 
 void BuildOrderGoalManager::setBuildOrderGoals()
 {
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Nexus), 1, 1000);	// 1	Nexus
+	//addGoal(MetaType(BWAPI::UnitTypes::Protoss_Nexus), 1, 1000);	// 1	Nexus
 	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Probe), 1, 1000);	// 1	Probe
 
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Zealot),		12,		98);	// 12	Zealot
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Nexus),		2,		96);	// 2	Nexus
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Gateway),	3,		94);	// 3	Gateway
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Zealot),		18,		92);	// 18	Zealot
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Gateway),	5,		90);
+	//addGoal(MetaType(BWAPI::UnitTypes::Protoss_Zealot),		4,		98);	// 12	Zealot
+	//addGoal(MetaType(BWAPI::UnitTypes::Protoss_Nexus),		2,		96);	// 2	Nexus
+	//addGoal(MetaType(BWAPI::UnitTypes::Protoss_Gateway),	2,		94);	// 3	Gateway
+	//addGoal(MetaType(BWAPI::UnitTypes::Protoss_Zealot),		18,		92);	// 18	Zealot
+	//addGoal(MetaType(BWAPI::UnitTypes::Protoss_Gateway),	5,		90);
 
 	// sort the goals to make things quicker for us
 	std::sort(goals.begin(), goals.end());

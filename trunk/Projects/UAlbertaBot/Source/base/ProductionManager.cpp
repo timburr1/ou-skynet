@@ -17,8 +17,8 @@ ProductionManager::ProductionManager() : reservedMinerals(0), reservedGas(0),
 	populateTypeCharMap();
 
 	//setup neural nets. initially, we just want to test w/ gateways and zealots.
-	//nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Zealot));
-	//nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Gateway));
+	nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Zealot));
+	nets.push_back(NeuralNet(BWAPI::UnitTypes::Protoss_Gateway));
 
 	setBuildOrder(StarcraftBuildOrderSearchManager::getInstance()->getOpeningBuildOrder());
 }
