@@ -1339,14 +1339,14 @@ public:
 	
 	int getMinerals(const int frame) const
 	{
-		assert(frame >= currentFrame);
+		//assert(frame >= currentFrame);
 	
 		return minerals + (int)(getMineralsPerFrame() * (frame-currentFrame));
 	}
 	
 	int getGas(const int frame) const
 	{
-		assert(frame >= currentFrame);
+		//assert(frame >= currentFrame);
 	
 		return gas + (int)(getGasPerFrame() * (frame-currentFrame));
 	}
