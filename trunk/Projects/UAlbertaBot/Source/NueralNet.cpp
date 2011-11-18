@@ -14,6 +14,7 @@ using namespace std;
 
 NeuralNet::NeuralNet(BWAPI::UnitType unit)
 {
+	numWanted = BWAPI::Broodwar->self()->allUnitCount(unit);
 	thisUnit = unit;
 
 	BWAPI::Broodwar->printf("Creating neural net for: %s,\n", thisUnit.getName().c_str());	
@@ -191,4 +192,14 @@ double NeuralNet::sigmoidDerivative(double input)
 {
 	double sig = sigmoid(input); 
 	return sig * (1 - sig);
+}
+
+int NeuralNet::getNumWanted()
+{
+	return numWanted;
+}
+
+void NeuralNet::setNumWanted(int num)
+{
+	numWanted = num;
 }

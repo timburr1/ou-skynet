@@ -22,6 +22,8 @@ public:
 
 	void writeWeightsToFile();
 	double getQ(double inputs[]);
+	int getNumWanted();
+	void setNumWanted(int num);
 	void updateWeights(double reward);
 
 private:	
@@ -30,6 +32,7 @@ private:
 	double prevInputs[NUM_INPUTS];
 	double prevHiddenLayerOutputs[NUM_HIDDEN_NODES];
 	double prevPredictedQ;
+	int numWanted;
 
 	void initializeRandomWeights();
 	double randomGaussian(double min, double max);
