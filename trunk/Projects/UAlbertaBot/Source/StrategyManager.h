@@ -6,6 +6,9 @@
 #include "UnitInfoState.h"
 #include "base/WorkerManager.h"
 
+#include "base/ProductionManager.h"
+#include "NeuralNet.h"
+
 class StrategyManager 
 {
 	StrategyManager();
@@ -20,6 +23,10 @@ class StrategyManager
 	bool						firstAttackSent;
 
 	std::vector< std::pair<MetaType,int> > currentGoal;
+
+	
+	std::vector<NeuralNet> nets;
+	std::vector<NeuralNet> netsToUpdate;
 
 public:
 

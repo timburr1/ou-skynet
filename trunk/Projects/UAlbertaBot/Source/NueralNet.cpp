@@ -61,6 +61,11 @@ NeuralNet::NeuralNet(BWAPI::UnitType unit)
 	weightsFile.close();
 }
 
+BWAPI::UnitType NeuralNet::getUnit()
+{
+	return thisUnit;
+}
+
 void NeuralNet::writeWeightsToFile()
 {
 	string fileName("C:\\NN_weights\\");
