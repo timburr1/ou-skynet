@@ -216,6 +216,9 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 
 			if(thisQ > Q_THRESHOLD || r < EPSILON)
 			{
+				BWAPI::Broodwar->printf("Adding %s to build order, Q = %d", 
+					unit.getName().c_str(), thisQ);
+				
 				goal.push_back(std::pair<MetaType, int>(unit, 1));
 				netsToUpdate.push_back(n);
 			}
