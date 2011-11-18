@@ -1,6 +1,38 @@
 #include "Common.h"
 #include "StrategyManager.h"
 
+const double Q_THRESHOLD = 0.5;
+const double EPSILON = .01;
+const std::string names[] = {
+	"Protoss Probe",
+	"Protoss Pylon",
+	"Protoss Nexus",
+	"Protoss Gateway",
+	"Protoss Zealot",
+	"Protoss Cybernetics Core",
+	"Protoss Dragoon",
+	"Protoss Assimilator",
+	"Protoss Forge",
+	"Protoss Photon Cannon",
+	"Protoss High Templar",
+	"Protoss Citadel of Adun",
+	"Protoss Templar Archives",
+	"Protoss Robotics Facility",
+	"Protoss Robotics Support Bay",
+	"Protoss Observatory",
+	"Protoss Stargate",
+	"Protoss Scout",
+	"Protoss Arbiter Tribunal",
+	"Protoss Arbiter",
+	"Protoss Shield Battery",
+	"Protoss Dark Templar",
+	"Protoss Shuttle",
+	"Protoss Reaver",
+	"Protoss Observer",
+	"Protoss Corsair",
+	"Protoss Fleet Beacon",
+	"Protoss Carrier"};
+
 // gotta keep c++ static happy
 StrategyManager * StrategyManager::instance = NULL;
 
@@ -8,7 +40,14 @@ StrategyManager * StrategyManager::instance = NULL;
 StrategyManager::StrategyManager() :	firstAttackSent(false),
 										enemyRace(BWAPI::Broodwar->enemy()->getRace())
 {
+	//setup neural nets
+	BOOST_FOREACH(std::string name, names)
+	{
+		nets.push_back(NeuralNet(BWAPI::UnitTypes::getUnitType(name)));
+	}
 
+	//seed RNG for epsilon later
+	srand((unsigned) time(NULL));
 }
 
 // get an instance of this
@@ -143,85 +182,45 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 
 	//goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Probe, 1));
 
-
-	int numZealots =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
-	int numDragoons =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
-	int numProbes =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
-	int numNexusCompleted =		BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numNexusAll =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numCyber =				BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
-	int numCannon =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
-	int numGas =				BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Assimilator);
-
-	bool nexusInProgress =		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus) > 
-								BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-/*
-	int zealotsWanted = numZealots + 8;
-	int dragoonsWanted = numDragoons;
-	int gatewayWanted = 3;
-	int probesWanted = numProbes + 4;
-
-	if (UnitInfoState::getInstance()->enemyHasCloakedUnits())
-	{
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Photon_Cannon, 3));
-		if (numCannon > 0)
-		{
-			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
-		}
-		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Robotics_Facility) > 0)
-		{
-			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Observatory, 1));
-		}
-		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Observatory) > 0)
-		{
-			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Observer, 1));
-		}
-	}
-
-	if (numNexusAll >= 2 || BWAPI::Broodwar->getFrameCount() > 9000)
-	{
-		gatewayWanted = 6;
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Assimilator, 1));
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1));
-	}
-
-	if (numCyber > 0)
-	{
-		dragoonsWanted = numDragoons + 2;
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UpgradeTypes::Singularity_Charge, 1));
-	}
-
-	if (numNexusCompleted >= 3)
-	{
-		gatewayWanted = 8;
-		dragoonsWanted = numDragoons + 6;
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Observer, 1));
-	}
-
-	if (numNexusAll > 1)
-	{
-		probesWanted = numProbes + 6;
-	}
-*/
 	if (expand())
 	{
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
+		int nexi = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Nexus, nexi + 1));
+	}	
+	
+	BOOST_FOREACH(NeuralNet n, nets)
+	{
+		MetaType unit = MetaType(n.getUnit());
+
+		if(ProductionManager::getInstance()->canProduce(unit))
+		{
+			double params [33];
+
+			params[0] = 1.0; //bias
+			params[1] = 0.0; //total units
+			params[2] = //available unit capacity
+				BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed(); 
+			params[3] = log10((double) BWAPI::Broodwar->self()->minerals());
+			params[4] = log10((double) BWAPI::Broodwar->self()->gas());
+
+			for(int x=0; x <= 27; x++) 
+			{
+				int num = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::getUnitType(names[x]));
+				
+				params[x+5] = num;				
+				params[1] += num;
+			}			
+	
+			double thisQ = n.getQ(params);
+			double r = ((double)rand()/(double)RAND_MAX); 
+
+			if(thisQ > Q_THRESHOLD || r < EPSILON)
+			{
+				goal.push_back(std::pair<MetaType, int>(unit, 1));
+				netsToUpdate.push_back(n);
+			}
+		}
 	}
-/*
-	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Dragoon,	dragoonsWanted));
-	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Zealot,	zealotsWanted));
-	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Gateway,	gatewayWanted));
-	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Probe,	std::min(90, probesWanted)));
-*/
-	
-	
-	int maxQ = -1;
-	MetaType unitToBuild = MetaType(BWAPI::UnitTypes::Protoss_Probe);
-	//for each neural net
-		//if we can build that unit
-			//if net.getQ(state) > maxQ
-	
-	goal.push_back(std::pair<MetaType, int>(unitToBuild, numProbes+1));
 
 	currentGoal = goal;
 	return goal;	

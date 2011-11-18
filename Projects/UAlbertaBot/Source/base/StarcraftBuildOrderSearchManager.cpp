@@ -183,8 +183,9 @@ std::vector<MetaType> StarcraftBuildOrderSearchManager::getOpeningBuildOrder()
 	std::vector<std::string> buildStrings;
 	
 	//initial build order
+	buildStrings.push_back("0 0 0 0 1 0 0 3"); //0 = probe, 1 = pylon, 3 = gateway
+
 	//buildStrings.push_back("0 0 0 0 1 0 0 3 0 0 3 0 1 3 0 4 4 4 4 4 1 0 4 4 4");
-	buildStrings.push_back("0 0 0 0 1 0 0 3");
 
 	return getMetaVector(buildStrings[rand() % buildStrings.size()]);
 }

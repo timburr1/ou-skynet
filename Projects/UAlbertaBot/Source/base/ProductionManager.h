@@ -6,8 +6,6 @@
 #include "StarcraftBuildOrderSearchManager.h"
 #include "StrategyManager.h"
 
-#include "NeuralNet.h"
-
 typedef unsigned char Action;
 
 class CompareWhenStarted 
@@ -32,9 +30,6 @@ class ProductionManager
 	ProductionManager();
 	
 	static ProductionManager *	instance;
-
-	std::vector<NeuralNet> nets;
-	std::vector<NeuralNet> netsToUpdate;
 
 	std::map<char, MetaType>	typeCharMap;
 	std::vector< std::pair<MetaType, int> > searchGoal;
@@ -62,7 +57,6 @@ class ProductionManager
 	void						performCommand(BWAPI::UnitCommandType t);
 	void						printProductionInfo(int x, int y);
 	bool						canMakeNow(BWAPI::Unit * producer, MetaType t);
-	bool						canProduce(MetaType t);
 	std::vector<BWAPI::UnitType> canMakeList();
 	void						predictWorkerMovement(const Building & b);
 
@@ -80,9 +74,9 @@ public:
 
 	static ProductionManager *	getInstance();
 
+	bool						canProduce(MetaType t);
 	void						drawQueueInformation(std::map<BWAPI::UnitType, int> & numUnits, int x, int y, int index);
 	void						update();
-
 	void						onUnitMorph(BWAPI::Unit * unit);
 	void						onUnitDestroy(BWAPI::Unit * unit);
 	void						onSendText(std::string text);
