@@ -9,6 +9,32 @@
 #include "base/ProductionManager.h"
 #include "NeuralNet.h"
 
+const std::string protossUnits[] = {
+	"Protoss Zealot",
+	"Protoss Dragoon",
+	"Protoss High Templar",
+	"Protoss Scout",
+	"Protoss Arbiter",
+	"Protoss Dark Templar",
+	"Protoss Shuttle",
+	"Protoss Reaver",
+	"Protoss Observer",
+	"Protoss Corsair",
+	"Protoss Carrier"};
+
+const const std::string zergUnits[] = {
+	"Zerg Drone",
+	"Zerg Overlord",
+	"Zerg Hatchery",
+	"Zerg Spawning Pool",
+	"Zerg Zergling",
+	"Zerg Extractor",
+	"Zerg Lair",
+	"Zerg Hydralisk Den",
+	"Zerg Hydralisk",
+	"Zerg Spire",
+	"Zerg Mutalisk"};
+
 class StrategyManager 
 {
 	StrategyManager();
@@ -45,4 +71,5 @@ public:
 	bool	rushDetected();
 
 	std::vector< std::pair<MetaType,int> > getBuildOrderGoal();
+	void updateNeuralNets(int score);
 };
