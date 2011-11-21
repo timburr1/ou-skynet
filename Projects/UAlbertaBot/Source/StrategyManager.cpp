@@ -2,36 +2,7 @@
 #include "StrategyManager.h"
 
 const double Q_THRESHOLD = 0.5;
-const double EPSILON = .01;
-const std::string names[] = {
-	"Protoss Probe",
-	"Protoss Pylon",
-	"Protoss Nexus",
-	"Protoss Gateway",
-	"Protoss Zealot",
-	"Protoss Cybernetics Core",
-	"Protoss Dragoon",
-	"Protoss Assimilator",
-	"Protoss Forge",
-	"Protoss Photon Cannon",
-	"Protoss High Templar",
-	"Protoss Citadel of Adun",
-	"Protoss Templar Archives",
-	"Protoss Robotics Facility",
-	"Protoss Robotics Support Bay",
-	"Protoss Observatory",
-	"Protoss Stargate",
-	"Protoss Scout",
-	"Protoss Arbiter Tribunal",
-	"Protoss Arbiter",
-	"Protoss Shield Battery",
-	"Protoss Dark Templar",
-	"Protoss Shuttle",
-	"Protoss Reaver",
-	"Protoss Observer",
-	"Protoss Corsair",
-	"Protoss Fleet Beacon",
-	"Protoss Carrier"};
+const double EPSILON = .0001;
 
 // gotta keep c++ static happy
 StrategyManager * StrategyManager::instance = NULL;
@@ -41,7 +12,7 @@ StrategyManager::StrategyManager() :	firstAttackSent(false),
 										enemyRace(BWAPI::Broodwar->enemy()->getRace())
 {
 	//setup neural nets
-	BOOST_FOREACH(std::string name, names)
+	BOOST_FOREACH(std::string name, protossUnits)
 	{
 		nets.push_back(NeuralNet(BWAPI::UnitTypes::getUnitType(name)));
 	}
@@ -188,12 +159,12 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Nexus, nexi + 1));
 	}	
 	
+	//TODO: max out little dudes on all carriers and reavers
+
 	BOOST_FOREACH(NeuralNet n, nets)
 	{
 		MetaType unit = MetaType(n.getUnit());
 
-		if(ProductionManager::getInstance()->canProduce(unit))
-		{
 			double params [33];
 
 			params[0] = 1.0; //bias
@@ -205,7 +176,7 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 
 			for(int x=0; x <= 27; x++) 
 			{
-				int num = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::getUnitType(names[x]));
+				int num = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::getUnitType(protossUnits[x]));
 				
 				params[x+5] = num;				
 				params[1] += num;
@@ -214,17 +185,32 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 			double thisQ = n.getQ(params);
 			double r = ((double)rand()/(double)RAND_MAX); 
 
-			if(thisQ > Q_THRESHOLD || r < EPSILON)
+			if(thisQ > Q_THRESHOLD)
 			{
-				BWAPI::Broodwar->printf("Adding %s to build order, Q = %d", 
+				BWAPI::Broodwar->printf("Adding %s to goal, Q = %f", 
 					unit.getName().c_str(), thisQ);
-				
-				goal.push_back(std::pair<MetaType, int>(unit, 1));
+
+				goal.push_back(std::pair<MetaType, int>(unit, n.getNumWanted() + 1));
 				netsToUpdate.push_back(n);
 			}
-		}
+			else if(r < EPSILON)
+			{
+				BWAPI::Broodwar->printf("Randomly adding %s to goal.", 
+					unit.getName().c_str());
+				
+				goal.push_back(std::pair<MetaType, int>(unit, n.getNumWanted() + 1));
+				netsToUpdate.push_back(n);
+			}
 	}
 
 	currentGoal = goal;
 	return goal;	
+}
+
+void StrategyManager::updateNeuralNets(int score)
+{
+	BOOST_FOREACH(NeuralNet net, netsToUpdate)
+	{
+		net.updateWeights((double) score);
+	}
 }
