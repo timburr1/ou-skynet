@@ -33,7 +33,9 @@ void UAlbertaBotModule::onStart()
 	BWTA::analyze();
 }
 
-void UAlbertaBotModule::onEnd(bool isWinner){}
+void UAlbertaBotModule::onEnd(bool isWinner){
+	ProductionManager::getInstance()->onEnd();
+}
 
 void UAlbertaBotModule::onFrame()
 {
