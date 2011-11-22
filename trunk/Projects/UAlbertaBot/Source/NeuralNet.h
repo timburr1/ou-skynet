@@ -17,6 +17,7 @@ class NeuralNet
 {
 public:
 	NeuralNet(BWAPI::UnitType unit);
+	~NeuralNet();
 
 	BWAPI::UnitType getUnit(); 
 
