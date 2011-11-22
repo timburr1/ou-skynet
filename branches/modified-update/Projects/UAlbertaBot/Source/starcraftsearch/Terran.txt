@@ -1,0 +1,17 @@
+Terran SCV
+Terran Supply Depot
+Terran Command Center
+Terran Barracks
+Terran Bunker
+Terran Marine
+Terran Academy
+Terran Refinery
+Terran Medic
+Terran Starport
+Terran Wraith
+Terran Factory
+Terran Engineering Bay
+Terran Control Tower
+Terran Physics Lab
+Terran Science Facility
+Terran Battlecruiser

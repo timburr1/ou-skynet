@@ -1,0 +1,30 @@
+Protoss Probe
+Protoss Pylon
+Protoss Nexus
+Protoss Gateway
+Protoss Zealot
+Protoss Cybernetics Core
+Protoss Dragoon
+Protoss Assimilator
+Protoss Forge
+Protoss Photon Cannon
+Protoss High Templar
+Protoss Citadel of Adun
+Protoss Templar Archives
+Protoss Robotics Facility
+Protoss Robotics Support Bay
+Protoss Observatory
+Protoss Stargate
+Protoss Scout
+Protoss Arbiter Tribunal
+Protoss Arbiter
+Protoss Shield Battery
+Protoss Dark Templar
+Protoss Shuttle
+Protoss Reaver
+Protoss Observer
+Protoss Corsair
+Protoss Fleet Beacon
+Protoss Carrier
+Leg Enhancements
+Singularity Charge
