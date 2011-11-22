@@ -74,8 +74,8 @@ class StrategyManager
 	std::vector< std::pair<MetaType,int> > currentGoal;
 
 	
-	std::vector<NeuralNet> nets;
-	std::vector<NeuralNet> netsToUpdate;
+	std::vector<NeuralNet*> nets;
+	std::vector<NeuralNet*> netsToUpdate;
 
 public:
 
@@ -95,7 +95,8 @@ public:
 
 	std::vector< std::pair<MetaType,int> > getBuildOrderGoal();
 	void updateNeuralNets(int score);
+	void onEnd(int score);
 
 private:
-	bool contains(std::vector<NeuralNet> nets, NeuralNet n);
+	bool contains(std::vector<NeuralNet*> nets, NeuralNet* n);
 };

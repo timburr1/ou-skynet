@@ -67,7 +67,7 @@ NeuralNet::~NeuralNet()
 	delete [] xzWeights;
 	delete [] zyWeights;
 	delete [] prevInputs;
-	double [] prevHiddenLayerOutputs;
+	delete [] prevHiddenLayerOutputs;
 }
 
 void NeuralNet::writeWeightsToFile()
@@ -136,6 +136,7 @@ void NeuralNet::updateWeights(double reward)
 	for(int j = 0; j < NUM_HIDDEN_NODES; j++)
 	{		
 		zyWeights[j] = zyWeights[j] + LEARNING_RATE * error * prevHiddenLayerOutputs[j];
+		if(j == 0) BWAPI::Broodwar->printf("%f", zyWeights[j]);
 	}
 
 	//update xz weights
