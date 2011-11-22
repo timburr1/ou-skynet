@@ -14,7 +14,7 @@ using namespace std;
 
 NeuralNet::NeuralNet(BWAPI::UnitType unit)
 {
-	numWanted = BWAPI::Broodwar->self()->allUnitCount(unit);
+	numWanted = BWAPI::Broodwar->self()->visibleUnitCount(unit);
 	thisUnit = unit;
 
 	BWAPI::Broodwar->printf("Creating neural net for: %s,\n", thisUnit.getName().c_str());	
@@ -26,7 +26,7 @@ NeuralNet::NeuralNet(BWAPI::UnitType unit)
 	fileName += unit.getName();
 	fileName += ".txt";
 
-	printf("\nFilename is: %s", fileName);
+	//printf("\nFilename is: %s", fileName);
 
 	ifstream weightsFile(fileName.c_str());
 	
@@ -60,11 +60,6 @@ NeuralNet::NeuralNet(BWAPI::UnitType unit)
 	}
 
 	weightsFile.close();
-}
-
-BWAPI::UnitType NeuralNet::getUnit()
-{
-	return thisUnit;
 }
 
 void NeuralNet::writeWeightsToFile()
@@ -192,6 +187,11 @@ double NeuralNet::sigmoidDerivative(double input)
 {
 	double sig = sigmoid(input); 
 	return sig * (1 - sig);
+}
+
+BWAPI::UnitType NeuralNet::getUnit()
+{
+	return thisUnit;
 }
 
 int NeuralNet::getNumWanted()
