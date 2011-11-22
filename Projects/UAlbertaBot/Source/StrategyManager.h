@@ -72,7 +72,6 @@ class StrategyManager
 	bool						firstAttackSent;
 
 	std::vector< std::pair<MetaType,int> > currentGoal;
-
 	
 	std::vector<NeuralNet*> nets;
 	std::vector<NeuralNet*> netsToUpdate;

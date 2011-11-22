@@ -11,7 +11,8 @@
 //available capacity, log minerals, log vespene gas
 #define NUM_INPUTS 33
 #define NUM_HIDDEN_NODES 7
-#define LEARNING_RATE .000001
+#define LEARNING_RATE .0000001
+#define DISCOUNT_RATE 0.9
 
 class NeuralNet
 {
@@ -25,7 +26,7 @@ public:
 	double getQ(double inputs[]);
 	int getNumWanted();
 	void setNumWanted(int num);
-	void updateWeights(double reward);
+	void updateWeights(double reward, double maxQ);
 
 private:	
 	double xzWeights [NUM_INPUTS][NUM_HIDDEN_NODES];

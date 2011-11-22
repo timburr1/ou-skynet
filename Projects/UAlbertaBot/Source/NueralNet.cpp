@@ -128,9 +128,9 @@ double NeuralNet::getQ(double inputs[])
 	return predictedQ;
 }
 
-void NeuralNet::updateWeights(double reward)
+void NeuralNet::updateWeights(double reward, double maxQ)
 {
-	double error = reward - prevPredictedQ; 
+	double error = reward + (DISCOUNT_RATE * maxQ) - prevPredictedQ; 
 
 	//update zy weights
 	for(int j = 0; j < NUM_HIDDEN_NODES; j++)
