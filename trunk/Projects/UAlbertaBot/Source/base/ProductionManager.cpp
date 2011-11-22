@@ -6,6 +6,8 @@
 #include "starcraftsearch\DFBBStarcraftSearch.hpp"
 #include "starcraftsearch\StarcraftData.hpp"
 
+#include <fstream>
+
 #define BOADD(N, T, B) for (int i=0; i<N; ++i) { queue.queueAsLowestPriority(MetaType(T), B); }
 
 #define GOAL_ADD(G, M, N) G.push_back(std::pair<MetaType, int>(M, N))
@@ -584,8 +586,21 @@ ProductionManager * ProductionManager::getInstance() {
 	return ProductionManager::instance;
 }
 
-void ProductionManager::updateWeightsOnEnd()
+void ProductionManager::onEnd()
 {
+	//tell strategy manager to write nn weights out
+	int score = BWAPI::Broodwar->self()->getUnits().size();
+		score -= BWAPI::Broodwar->enemy()->getUnits().size();
+	StrategyManager::getInstance()->onEnd(score);
+
 	//append average final score to file
+	std::fstream rewardsFile;
+	rewardsFile.open("C:\\NN_weights\\Rewards.txt", std::fstream::app);
 	
+	assert(rewardsFile.is_open());
+
+	rewardsFile << ProductionManager::averageScore;
+	rewardsFile <<"\n";
+
+	rewardsFile.close();
 }

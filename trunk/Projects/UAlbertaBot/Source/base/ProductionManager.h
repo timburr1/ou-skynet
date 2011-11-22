@@ -82,4 +82,5 @@ public:
 	void						onUnitMorph(BWAPI::Unit * unit);
 	void						onUnitDestroy(BWAPI::Unit * unit);
 	void						onSendText(std::string text);
+	void						onEnd();
 };

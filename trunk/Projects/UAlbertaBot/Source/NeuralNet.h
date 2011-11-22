@@ -11,7 +11,7 @@
 //available capacity, log minerals, log vespene gas
 #define NUM_INPUTS 33
 #define NUM_HIDDEN_NODES 7
-#define LEARNING_RATE .0000000001
+#define LEARNING_RATE .000001
 
 class NeuralNet
 {
