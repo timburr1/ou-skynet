@@ -1,15 +1,15 @@
 #include "Common.h"
 #include "StrategyManager.h"
 
-const double Q_THRESHOLD = 0.5;
-const double EPSILON = .0001;
+const double Q_THRESHOLD = .75;
+const double EPSILON = .1;
 
 // gotta keep c++ static happy
 StrategyManager * StrategyManager::instance = NULL;
 
 // constructor
 StrategyManager::StrategyManager() :	firstAttackSent(false),
-										enemyRace(BWAPI::Broodwar->enemy()->getRace())
+enemyRace(BWAPI::Broodwar->enemy()->getRace())
 {
 	//setup neural nets
 	BOOST_FOREACH(std::string name, protossUnits)
@@ -84,7 +84,7 @@ bool StrategyManager::doAttack(const UnitVector & freeUnits)
 	int numUnitsNeededForAttack = 3;
 
 	bool doAttack  = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) >= 1
-					|| ourForceSize >= numUnitsNeededForAttack;
+		|| ourForceSize >= numUnitsNeededForAttack;
 
 	if (doAttack)
 	{
@@ -155,15 +155,38 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 
 	if (expand())
 	{
+		BWAPI::Broodwar->printf("Expanding the base.");
+
 		int nexi = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
 		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Protoss_Nexus, nexi + 1));
 	}	
-	
-	//TODO: max out little dudes on all carriers and reavers
 
-	BOOST_FOREACH(NeuralNet n, nets)
+	double r = ((double)rand()/(double)RAND_MAX); 
+	if(r < EPSILON)
 	{
-		MetaType unit = MetaType(n.getUnit());
+		int randomIndex = ((int) rand()) % nets.size();
+		NeuralNet *n = &(nets.at(randomIndex));
+
+		BWAPI::UnitType unitToBuild = n->getUnit();
+		int newNumWanted = n->getNumWanted() + 1;
+
+		//n->setNumWanted(newNumWanted);
+		goal.push_back(std::pair<MetaType, int>(unitToBuild, newNumWanted));
+
+		BWAPI::Broodwar->printf("Randomly adding %s to goal.", 
+			unitToBuild.getName().c_str());		
+
+		if(!contains(netsToUpdate, *n))
+			netsToUpdate.push_back(*n);
+	}
+	else
+	{
+		double maxQ = -1000.0;
+		NeuralNet *netToBuild;
+
+		BOOST_FOREACH(NeuralNet n, nets)
+		{
+			MetaType unit = MetaType(n.getUnit());
 
 			double params [33];
 
@@ -176,31 +199,32 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 
 			for(int x=0; x <= 27; x++) 
 			{
-				int num = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::getUnitType(protossUnits[x]));
-				
+				int num = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::getUnitType(protossUnitsAndBuildings[x]));
+
 				params[x+5] = num;				
 				params[1] += num;
 			}			
-	
+
 			double thisQ = n.getQ(params);
-			double r = ((double)rand()/(double)RAND_MAX); 
 
-			if(thisQ > Q_THRESHOLD)
+			if(thisQ > maxQ)
 			{
-				BWAPI::Broodwar->printf("Adding %s to goal, Q = %f", 
-					unit.getName().c_str(), thisQ);
+				maxQ = thisQ;
+				netToBuild = &n;		
+			}
+		}
 
-				goal.push_back(std::pair<MetaType, int>(unit, n.getNumWanted() + 1));
-				netsToUpdate.push_back(n);
-			}
-			else if(r < EPSILON)
-			{
-				BWAPI::Broodwar->printf("Randomly adding %s to goal.", 
-					unit.getName().c_str());
-				
-				goal.push_back(std::pair<MetaType, int>(unit, n.getNumWanted() + 1));
-				netsToUpdate.push_back(n);
-			}
+		BWAPI::UnitType unitToBuild = netToBuild->getUnit();
+		int newNumWanted = netToBuild->getNumWanted() + 1;
+		netToBuild->setNumWanted(newNumWanted);
+
+		BWAPI::Broodwar->printf("Adding %s to goal. Have, %d, want %d", unitToBuild.getName().c_str(), 
+			BWAPI::Broodwar->self()->completedUnitCount(unitToBuild), newNumWanted);
+
+		goal.push_back(std::pair<MetaType, int>(unitToBuild, newNumWanted));
+
+		if(!contains(netsToUpdate, *netToBuild))
+			netsToUpdate.push_back(*netToBuild);
 	}
 
 	currentGoal = goal;
@@ -213,4 +237,15 @@ void StrategyManager::updateNeuralNets(int score)
 	{
 		net.updateWeights((double) score);
 	}
+}
+
+bool StrategyManager::contains(std::vector<NeuralNet> nets, NeuralNet n)
+{
+	BOOST_FOREACH(NeuralNet thisN, nets)
+	{
+		if(thisN.getUnit().getName().compare(n.getUnit().getName()) == 0)
+			return true;
+	}
+
+	return false;
 }

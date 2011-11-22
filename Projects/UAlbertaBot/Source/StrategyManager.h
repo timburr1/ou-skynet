@@ -9,20 +9,43 @@
 #include "base/ProductionManager.h"
 #include "NeuralNet.h"
 
-const std::string protossUnits[] = {
+const std::string protossUnitsAndBuildings[] = {
+	"Protoss Probe",
+	"Protoss Pylon",
+	"Protoss Nexus",
+	"Protoss Gateway",
 	"Protoss Zealot",
+	"Protoss Cybernetics Core",
 	"Protoss Dragoon",
+	"Protoss Assimilator",
+	"Protoss Forge",
+	"Protoss Photon Cannon",
 	"Protoss High Templar",
+	"Protoss Citadel of Adun",
+	"Protoss Templar Archives",
+	"Protoss Robotics Facility",
+	"Protoss Robotics Support Bay",
+	"Protoss Observatory",
+	"Protoss Stargate",
 	"Protoss Scout",
+	"Protoss Arbiter Tribunal",
 	"Protoss Arbiter",
+	"Protoss Shield Battery",
 	"Protoss Dark Templar",
 	"Protoss Shuttle",
 	"Protoss Reaver",
 	"Protoss Observer",
 	"Protoss Corsair",
+	"Protoss Fleet Beacon",
 	"Protoss Carrier"};
 
-const const std::string zergUnits[] = {
+const std::string protossUnits[] = {
+	"Protoss Dark Templar",
+	"Protoss Dragoon",
+	"Protoss Observer",
+	"Protoss Zealot"};
+
+const std::string zergUnits[] = {
 	"Zerg Drone",
 	"Zerg Overlord",
 	"Zerg Hatchery",
@@ -72,4 +95,7 @@ public:
 
 	std::vector< std::pair<MetaType,int> > getBuildOrderGoal();
 	void updateNeuralNets(int score);
+
+private:
+	bool contains(std::vector<NeuralNet> nets, NeuralNet n);
 };

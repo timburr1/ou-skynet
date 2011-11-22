@@ -65,7 +65,9 @@ class ProductionManager
 	int							getFreeMinerals();
 	int							getFreeGas();
 
-	int							reservedMinerals, reservedGas;
+	int							reservedMinerals, reservedGas, numRewards;
+
+	double						averageScore;
 	
 	bool						enemyCloakedDetected;
 	bool						rushDetected;

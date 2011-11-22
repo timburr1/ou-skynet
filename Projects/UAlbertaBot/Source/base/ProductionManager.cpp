@@ -11,6 +11,7 @@
 #define GOAL_ADD(G, M, N) G.push_back(std::pair<MetaType, int>(M, N))
 
 ProductionManager::ProductionManager() : reservedMinerals(0), reservedGas(0), 
+	numRewards(0), averageScore(0.0),
 	assignedWorkerForThisBuilding(false), haveLocationForThisBuilding(false),
 	enemyCloakedDetected(false), rushDetected(false)
 {
@@ -39,6 +40,8 @@ void ProductionManager::testBuildOrderSearch(std::vector< std::pair<MetaType, in
 	BWAPI::Race ourRace = BWAPI::Broodwar->self()->getRace();
 	std::vector<MetaType> buildOrder = StarcraftBuildOrderSearchManager::getInstance()->findBuildOrder(ourRace, goal);
 
+	BWAPI::Broodwar->printf("Build order size is: %d", goal.size());
+
 	// set the build order
 	setBuildOrder(buildOrder);
 }
@@ -62,11 +65,28 @@ void ProductionManager::update()
 	}
 
 	// if they have cloaked units get a new goal asap
-	if (!enemyCloakedDetected && UnitInfoState::getInstance()->enemyHasCloakedUnits())
+/*	if (!enemyCloakedDetected && UnitInfoState::getInstance()->enemyHasCloakedUnits())
 	{
 		BWAPI::Broodwar->printf("Enemy Cloaked Unit Detected!");
 		testBuildOrderSearch(StrategyManager::getInstance()->getBuildOrderGoal());
 		enemyCloakedDetected = true;
+	}*/
+
+	// update neural net weights every 20sec.
+	if(BWAPI::Broodwar->getFrameCount() % (24*20) == 0 && 
+		BWAPI::Broodwar->getFrameCount() > 24*180)
+	{
+		//score = our units - theirs
+		int score = BWAPI::Broodwar->self()->getUnits().size();
+		score -= BWAPI::Broodwar->enemy()->getUnits().size();
+
+		averageScore *= numRewards;
+		numRewards++;
+		averageScore = (averageScore + score) / numRewards;
+
+		BWAPI::Broodwar->printf("Average score = %f", averageScore);
+
+		StrategyManager::getInstance()->updateNeuralNets(score);
 	}
 
 	printProductionInfo(10, 30);
@@ -562,4 +582,10 @@ ProductionManager * ProductionManager::getInstance() {
 	}
 
 	return ProductionManager::instance;
+}
+
+void ProductionManager::updateWeightsOnEnd()
+{
+	//append average final score to file
+	
 }
