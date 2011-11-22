@@ -62,6 +62,14 @@ NeuralNet::NeuralNet(BWAPI::UnitType unit)
 	weightsFile.close();
 }
 
+NeuralNet::~NeuralNet()
+{
+	delete [] xzWeights;
+	delete [] zyWeights;
+	delete [] prevInputs;
+	double [] prevHiddenLayerOutputs;
+}
+
 void NeuralNet::writeWeightsToFile()
 {
 	string fileName("C:\\NN_weights\\");
