@@ -42,7 +42,7 @@ void ProductionManager::testBuildOrderSearch(std::vector< std::pair<MetaType, in
 	BWAPI::Race ourRace = BWAPI::Broodwar->self()->getRace();
 	std::vector<MetaType> buildOrder = StarcraftBuildOrderSearchManager::getInstance()->findBuildOrder(ourRace, goal);
 
-	BWAPI::Broodwar->printf("Build order size is: %d", goal.size());
+	//BWAPI::Broodwar->printf("Build order size is: %d", goal.size());
 
 	// set the build order
 	setBuildOrder(buildOrder);

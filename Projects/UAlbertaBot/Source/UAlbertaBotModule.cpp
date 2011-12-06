@@ -28,6 +28,7 @@ void UAlbertaBotModule::onStart()
 	BWAPI::Broodwar->setLocalSpeed(0);
 
 	BWAPI::Broodwar->enableFlag(BWAPI::Flag::UserInput);
+	BWAPI::Broodwar->enableFlag(BWAPI::Flag::CompleteMapInformation);
 
 	BWTA::readMap();
 	BWTA::analyze();
@@ -36,6 +37,17 @@ void UAlbertaBotModule::onStart()
 void UAlbertaBotModule::onEnd(bool isWinner)
 {
 	ProductionManager::getInstance()->onEnd();
+
+	//append average final score to file
+	std::fstream WLFile;
+	WLFile.open("C:\\NN_weights\\WL.txt", std::fstream::app);
+	
+	assert(WLFile.is_open());
+
+	WLFile << isWinner;
+	WLFile <<"\n";
+
+	WLFile.close();
 }
 
 void UAlbertaBotModule::onFrame()

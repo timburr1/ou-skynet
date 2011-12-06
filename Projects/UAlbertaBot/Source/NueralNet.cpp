@@ -60,6 +60,7 @@ NeuralNet::NeuralNet(BWAPI::UnitType unit)
 	}
 
 	weightsFile.close();
+	timeActionWasChosen = 0;
 }
 
 NeuralNet::~NeuralNet()
@@ -122,21 +123,22 @@ double NeuralNet::getQ(double inputs[])
 		predictedQ += sigmoid(sum) * zyWeights[j];
 	}
 
-	//save prediction for updating weights
-	prevPredictedQ = predictedQ;
-
 	return predictedQ;
 }
 
-void NeuralNet::updateWeights(double reward)
+void NeuralNet::updateWeights(double reward,double maxQ, std::vector<NeuralNet*> nets)
 {
-	double error = reward - prevPredictedQ; 
+
+	//determine the time since the action was chosen
+	double discountRate = (BWAPI::Broodwar->getFrameCount()-timeActionWasChosen)/24;//this gives seconds since action was chosen
+
+	double error = reward + pow(GAMMA,discountRate)*maxQ - prevPredictedQ; 
 
 	//update zy weights
 	for(int j = 0; j < NUM_HIDDEN_NODES; j++)
 	{		
 		zyWeights[j] = zyWeights[j] + LEARNING_RATE * error * prevHiddenLayerOutputs[j];
-		if(j == 0) BWAPI::Broodwar->printf("%f", zyWeights[j]);
+		//if(j == 0) BWAPI::Broodwar->printf("%f", zyWeights[j]);
 	}
 
 	//update xz weights
@@ -211,4 +213,14 @@ int NeuralNet::getNumWanted()
 void NeuralNet::setNumWanted(int num)
 {
 	numWanted = num;
+}
+
+void NeuralNet::setTimeActionWasChosen(double time)
+{
+	timeActionWasChosen = time;
+}
+
+void NeuralNet::setPrevPredictedQ(double Q)
+{
+	prevPredictedQ = Q;
 }

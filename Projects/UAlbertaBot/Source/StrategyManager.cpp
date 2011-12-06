@@ -2,7 +2,7 @@
 #include "StrategyManager.h"
 
 const double Q_THRESHOLD = .75;
-const double EPSILON = .1;
+const double EPSILON = .05;
 
 // gotta keep c++ static happy
 StrategyManager * StrategyManager::instance = NULL;
@@ -187,7 +187,7 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 	}
 	else
 	{
-		double maxQ = -1000.0;
+		double maxQ = -100000.0;
 		NeuralNet *netToBuild = NULL;
 		
 		BOOST_FOREACH(NeuralNet *n, nets)
@@ -232,7 +232,11 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 			goal.push_back(std::pair<MetaType, int>(unitType, numWanted));
 
 			if(!contains(netsToUpdate, netToBuild))
+			{
 				netsToUpdate.push_back(netToBuild);
+				netToBuild->setTimeActionWasChosen(BWAPI::Broodwar->getFrameCount());
+				netToBuild->setPrevPredictedQ(maxQ);
+			}
 		}
 	}
 
@@ -242,9 +246,39 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 
 void StrategyManager::updateNeuralNets(int score)
 {
+	//determine the maxQ at this time
+	double maxQ = -100000.0;
+	BOOST_FOREACH(NeuralNet *n, nets)
+		{
+			double params [33];
+
+			params[0] = 1.0; //bias
+			params[1] = 0.0; //total units
+			params[2] = //available unit capacity
+				BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed(); 
+			params[3] = log10((double) BWAPI::Broodwar->self()->minerals());
+			params[4] = log10((double) BWAPI::Broodwar->self()->gas());
+
+			for(int x=0; x < 28; x++) 
+			{
+				int num = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::getUnitType(protossUnitsAndBuildings[x]));
+
+				params[x+5] = num;				
+				params[1] += num;
+			}			
+
+			double thisQ = n->getQ(params);
+
+			if(thisQ > maxQ)
+			{
+				maxQ = thisQ;	
+			}
+		}
+
+
 	BOOST_FOREACH(NeuralNet *net, netsToUpdate)
 	{
-		net->updateWeights((double) score);
+		net->updateWeights((double) score, maxQ, nets);//score is our reward
 	}
 
 	netsToUpdate.clear();
@@ -252,10 +286,7 @@ void StrategyManager::updateNeuralNets(int score)
 
 void StrategyManager::onEnd(int score)
 {
-	BOOST_FOREACH(NeuralNet *net, netsToUpdate)
-	{
-		net->updateWeights((double) score);
-	}
+	StrategyManager::updateNeuralNets(score);
 
 	BOOST_FOREACH(NeuralNet *net, nets)
 	{
