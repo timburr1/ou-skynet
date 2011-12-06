@@ -47,6 +47,10 @@ void CombatCommander::update(const UnitVector & allCombatUnits)
 
 		// the default order is to defend near a choke point
 		SquadOrder					order(SquadOrder::Defend, getDefendLocation(), 1000);
+		if(BWAPI::Broodwar->getFrameCount() > 24*60*5) //This line makes units attack if they haven't won or lost after five minutes
+		{
+			SquadOrder order(SquadOrder::Attack,getDefendLocation(),10000);
+		}
 		
 		// if we are attacking, what area are we attacking?
 		if (!workersInCombat && StrategyManager::getInstance()->doAttack(freeUnits)) 
