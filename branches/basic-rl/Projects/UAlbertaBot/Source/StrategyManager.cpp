@@ -11,11 +11,11 @@ StrategyManager * StrategyManager::instance = NULL;
 StrategyManager::StrategyManager() :	firstAttackSent(false),
 enemyRace(BWAPI::Broodwar->enemy()->getRace())
 {
-	//setup neural nets
+	//setup Q functions
 	BOOST_FOREACH(std::string name, protossUnits)
 	{
-		NeuralNet *n = new NeuralNet(BWAPI::UnitTypes::getUnitType(name));
-		nets.push_back(n);
+		Qlearning *q = new Qlearning(BWAPI::UnitTypes::getUnitType(name));
+		Qs.push_back(q);
 	}
 
 	//seed RNG for epsilon later
@@ -166,11 +166,11 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 	double r = ((double)rand()/(double)RAND_MAX); 
 	if(r < EPSILON)
 	{
-		int randomIndex = ((int) rand()) % nets.size();
+		int randomIndex = ((int) rand()) % Qs.size();
 		
-		NeuralNet *n = nets.at(randomIndex);
+		Qlearning *q = Qs.at(randomIndex);
 
-		BWAPI::UnitType unitType = n->getUnit();
+		BWAPI::UnitType unitType = q->getUnit();
 		//int newNumWanted = n->getNumWanted() + 1;
 		//n->setNumWanted(newNumWanted);
 
@@ -182,45 +182,28 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 		BWAPI::Broodwar->printf("Randomly adding %s to goal. Have %d, want %d", 
 			unitType.getName().c_str(), num, numWanted);		
 
-		if(!contains(netsToUpdate, n))
-			netsToUpdate.push_back(n);
+		if(!contains(QsToUpdate, q))
+			QsToUpdate.push_back(q);
 	}
 	else
 	{
 		double maxQ = -100000.0;
-		NeuralNet *netToBuild = NULL;
+		Qlearning *qToBuild = NULL;
 		
-		BOOST_FOREACH(NeuralNet *n, nets)
+		BOOST_FOREACH(Qlearning *q, Qs)
 		{
-			double params [33];
-
-			params[0] = 1.0; //bias
-			params[1] = 0.0; //total units
-			params[2] = //available unit capacity
-				BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed(); 
-			params[3] = log10((double) BWAPI::Broodwar->self()->minerals());
-			params[4] = log10((double) BWAPI::Broodwar->self()->gas());
-
-			for(int x=0; x < 28; x++) 
-			{
-				int num = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::getUnitType(protossUnitsAndBuildings[x]));
-
-				params[x+5] = num;				
-				params[1] += num;
-			}			
-
-			double thisQ = n->getQ(params);
+			double thisQ = q->getQ();
 
 			if(thisQ > maxQ)
 			{
 				maxQ = thisQ;
-				netToBuild = n;		
+				qToBuild = q;		
 			}
 		}
 
-		if(netToBuild != NULL)
+		if(qToBuild != NULL)
 		{
-			BWAPI::UnitType unitType = netToBuild->getUnit();
+			BWAPI::UnitType unitType = qToBuild->getUnit();
 			int num = BWAPI::Broodwar->self()->allUnitCount(unitType);
 			int numWanted = num + 1;
 			/*netToBuild->getNumWanted() + 1;
@@ -231,11 +214,11 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 	
 			goal.push_back(std::pair<MetaType, int>(unitType, numWanted));
 
-			if(!contains(netsToUpdate, netToBuild))
+			if(!contains(QsToUpdate, qToBuild))
 			{
-				netsToUpdate.push_back(netToBuild);
-				netToBuild->setTimeActionWasChosen(BWAPI::Broodwar->getFrameCount());
-				netToBuild->setPrevPredictedQ(maxQ);
+				QsToUpdate.push_back(qToBuild);
+				qToBuild->setTimeActionWasChosen(BWAPI::Broodwar->getFrameCount());
+				qToBuild->setPrevPredictedQ(maxQ);
 			}
 		}
 	}
@@ -244,30 +227,14 @@ std::vector< std::pair<MetaType,int> > StrategyManager::getBuildOrderGoal()
 	return goal;	
 }
 
-void StrategyManager::updateNeuralNets(int score)
+void StrategyManager::updateQs(int score)
 {
 	//determine the maxQ at this time
 	double maxQ = -100000.0;
-	BOOST_FOREACH(NeuralNet *n, nets)
+	BOOST_FOREACH(Qlearning *q, Qs)
 		{
-			double params [33];
 
-			params[0] = 1.0; //bias
-			params[1] = 0.0; //total units
-			params[2] = //available unit capacity
-				BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed(); 
-			params[3] = log10((double) BWAPI::Broodwar->self()->minerals());
-			params[4] = log10((double) BWAPI::Broodwar->self()->gas());
-
-			for(int x=0; x < 28; x++) 
-			{
-				int num = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::getUnitType(protossUnitsAndBuildings[x]));
-
-				params[x+5] = num;				
-				params[1] += num;
-			}			
-
-			double thisQ = n->getQ(params);
+			double thisQ = q->getQ();
 
 			if(thisQ > maxQ)
 			{
@@ -276,29 +243,29 @@ void StrategyManager::updateNeuralNets(int score)
 		}
 
 
-	BOOST_FOREACH(NeuralNet *net, netsToUpdate)
+	BOOST_FOREACH(Qlearning *q, QsToUpdate)
 	{
-		net->updateWeights((double) score, maxQ, nets);//score is our reward
+		q->updateQ((double) score, maxQ);//score is our reward
 	}
 
-	netsToUpdate.clear();
+	QsToUpdate.clear();
 }
 
 void StrategyManager::onEnd(int score)
 {
-	StrategyManager::updateNeuralNets(score);
+	StrategyManager::updateQs(score);
 
-	BOOST_FOREACH(NeuralNet *net, nets)
+	BOOST_FOREACH(Qlearning *q, Qs)
 	{
-		net->writeWeightsToFile();
+		q->writeQsToFile();
 	}
 }
 
-bool StrategyManager::contains(std::vector<NeuralNet*> nets, NeuralNet *netToTest)
+bool StrategyManager::contains(std::vector<Qlearning*> updateQs, Qlearning *QToTest)
 {
-	BOOST_FOREACH(NeuralNet *thisNet, nets)
+	BOOST_FOREACH(Qlearning *thisQ, updateQs)
 	{
-		if(thisNet->getUnit().getName().compare(netToTest->getUnit().getName()) == 0)
+		if(thisQ->getUnit().getName().compare(QToTest->getUnit().getName()) == 0)
 			return true;
 	}
 
