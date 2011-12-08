@@ -40,7 +40,7 @@ void UAlbertaBotModule::onEnd(bool isWinner)
 
 	//append average final score to file
 	std::fstream WLFile;
-	WLFile.open("C:\\NN_weights\\WL.txt", std::fstream::app);
+	WLFile.open("C:\\Q_Values\\WL.txt", std::fstream::app);
 	
 	assert(WLFile.is_open());
 

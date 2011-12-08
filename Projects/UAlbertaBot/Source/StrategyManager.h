@@ -7,7 +7,7 @@
 #include "base/WorkerManager.h"
 
 #include "base/ProductionManager.h"
-#include "NeuralNet.h"
+#include "Qlearning.h"
 
 const std::string protossUnitsAndBuildings[] = {
 	"Protoss Probe",
@@ -74,8 +74,8 @@ class StrategyManager
 	std::vector< std::pair<MetaType,int> > currentGoal;
 
 	
-	std::vector<NeuralNet*> nets;
-	std::vector<NeuralNet*> netsToUpdate;
+	std::vector<Qlearning*> Qs;
+	std::vector<Qlearning*> QsToUpdate;
 
 public:
 
@@ -94,9 +94,9 @@ public:
 	bool	rushDetected();
 
 	std::vector< std::pair<MetaType,int> > getBuildOrderGoal();
-	void updateNeuralNets(int score);
+	void updateQs(int score);
 	void onEnd(int score);
 
 private:
-	bool contains(std::vector<NeuralNet*> nets, NeuralNet* n);
+	bool contains(std::vector<Qlearning*> updateQs, Qlearning *QToTest);
 };

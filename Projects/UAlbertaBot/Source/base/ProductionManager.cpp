@@ -88,7 +88,7 @@ void ProductionManager::update()
 
 		BWAPI::Broodwar->printf("Average score = %f", averageScore);
 
-		StrategyManager::getInstance()->updateNeuralNets(score);
+		StrategyManager::getInstance()->updateQs(score);
 	}
 
 	printProductionInfo(10, 30);
@@ -595,7 +595,7 @@ void ProductionManager::onEnd()
 
 	//append average final score to file
 	std::fstream rewardsFile;
-	rewardsFile.open("C:\\NN_weights\\Rewards.txt", std::fstream::app);
+	rewardsFile.open("C:\\Q_Values\\Rewards.txt", std::fstream::app);
 	
 	assert(rewardsFile.is_open());
 
