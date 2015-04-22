@@ -1,0 +1,1 @@
+Tim Burr's and Scott Lowe's Starcraft agent.
